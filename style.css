@@ -32,7 +32,7 @@ body, html {
     width: 100%;
     height: 100%;
     /* Foto real de la pareja de la carpeta ima */
-    background: url('ima/IMG-20260418-WA0059.jpg') center/cover no-repeat;
+    background: url('ima/IMG-20260330-WA0071.jpg') center/cover no-repeat;
     opacity: 0;
     visibility: hidden;
     transition: opacity 4s ease-in-out, visibility 4s;
