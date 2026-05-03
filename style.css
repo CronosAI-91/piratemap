@@ -1,0 +1,495 @@
+/* style.css */
+:root {
+    --map-bg: #e4c596; /* slightly more yellow/tan */
+    --map-stain: #c9a46b;
+    --leather-dark: #3e271a;
+    --paper-color: #f4e1bc;
+    --ink-color: #3b2818;
+    --ink-light: #5a3f28;
+    --route-red: #c21807; /* Rojo intenso brillante para que contraste */
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #27160d; /* Fondo oscuro estilo mesa de madera */
+    font-family: 'IM Fell English SC', serif;
+    color: var(--ink-color);
+}
+
+#treasure-photos {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Foto real de la pareja de la carpeta ima */
+    background: url('ima/IMG-20260418-WA0059.jpg') center/cover no-repeat;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 4s ease-in-out, visibility 4s;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); /* Oscurece un poco la foto para que se lea el texto */
+    z-index: 2;
+}
+
+/* --- Luciérnagas / Polvo Estelar --- */
+#fireflies-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 3; /* Encima de la foto y overlay, detrás del texto */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.firefly {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #fdf5e6;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px rgba(234, 203, 146, 0.8), 0 0 20px 4px rgba(255, 255, 255, 0.6);
+    opacity: 0;
+    animation: floatUp linear forwards;
+}
+
+.firefly::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: radial-gradient(circle, rgba(234, 203, 146, 0.5) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(-10vh) scale(1) translateX(10px);
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-120vh) scale(0.5) translateX(-20px);
+        opacity: 0;
+    }
+}
+
+#final-message-container {
+    position: relative;
+    z-index: 3;
+    max-width: 800px;
+    padding: 30px;
+    text-align: center;
+    color: #fdf5e6;
+    font-family: 'Caveat', cursive;
+    font-size: 2.3rem;
+    line-height: 1.5;
+    text-shadow: 2px 2px 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 3s ease-in-out 2s, transform 3s ease-in-out 2s; /* Espera 2 seg a que la imagen aparezca */
+}
+
+#treasure-photos.visible #final-message-container {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#final-message-container .highlight {
+    font-weight: bold;
+    color: #eacb92; /* Un dorado suave para las referencias */
+}
+
+.photo-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Oscurece la foto un poco para que resalte el texto */
+}
+
+#treasure-photos.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Contenedor Principal del Mapa */
+#map-container {
+    position: absolute;
+    top: 15px; left: 15px; right: 15px; bottom: 15px;
+    background-color: var(--map-bg);
+    background-image: 
+        linear-gradient(rgba(244, 225, 188, 0.3), rgba(244, 225, 188, 0.3)), /* Capa para aclarar el mapa */
+        url('mapa_fondo.png'); /* Usa la imagen hiperrealista generada */
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: normal;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.9), 0 0 25px rgba(0,0,0,0.9);
+    border-radius: 4px;
+    z-index: 10;
+    transition: opacity 3s ease-in-out;
+    overflow: hidden;
+}
+
+body.treasure-found #map-container {
+    opacity: 0.15; /* El mapa se desvanece al final */
+    pointer-events: none;
+}
+
+#path-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.route-line {
+    stroke-linecap: round;
+}
+
+/* Islas */
+.island {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 2s ease-in-out;
+    z-index: 20;
+    padding: 10px;
+    opacity: 1;
+}
+
+.island:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.island.locked {
+    opacity: 0;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.island.active {
+    animation: pulse-island 2s infinite;
+}
+
+@keyframes pulse-island {
+    0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 0 rgba(160, 48, 48, 0.6)); }
+    50% { transform: translate(-50%, -50%) scale(1.15); filter: drop-shadow(0 0 12px rgba(160, 48, 48, 0.8)); }
+    100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 0 rgba(160, 48, 48, 0)); }
+}
+
+.island-icon {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Brillo para despegar el ícono del fondo oscuro */
+    filter: drop-shadow(0 0 6px rgba(244, 225, 188, 0.7));
+}
+
+.island-name {
+    margin-top: 5px;
+    font-size: 1.6rem;
+    font-family: 'Caveat', cursive; /* Estilo caligrafía realista */
+    font-weight: bold;
+    text-align: center;
+    background: transparent; /* Quitar fondo de etiqueta */
+    border: none;
+    color: #110702;
+    /* Halo fuerte color pergamino para contrastar la tinta oscura */
+    text-shadow: 
+        -1px -1px 2px rgba(244, 225, 188, 0.9),
+         1px -1px 2px rgba(244, 225, 188, 0.9),
+        -1px  1px 2px rgba(244, 225, 188, 0.9),
+         1px  1px 2px rgba(244, 225, 188, 0.9),
+         0 0 10px rgba(244, 225, 188, 1),
+         0 0 20px rgba(244, 225, 188, 0.8);
+    white-space: nowrap;
+}
+
+/* Animación del barco pirata */
+@keyframes bobbing {
+    0%, 100% { transform: translate(-50%, -50%) rotate(-1deg) translateY(0); }
+    50% { transform: translate(-50%, -50%) rotate(2deg) translateY(-4px); }
+}
+
+/* El Barco Pirata */
+#pirate-ship {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    transition: top 3s ease-in-out, left 3s ease-in-out, opacity 1s;
+    /* Sombra negra y halo claro para que destaque en cualquier fondo */
+    filter: drop-shadow(0 0 8px rgba(244, 225, 188, 0.8)) drop-shadow(3px 3px 4px rgba(0,0,0,0.6));
+    animation: bobbing 4s infinite ease-in-out;
+}
+
+/* Modal del Diario (Estilo Cuaderno Abierto) */
+#diary-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+
+#diary-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.book-style {
+    width: 95%;
+    max-width: 550px;
+    position: relative;
+    transform: scale(1) translateY(0);
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    perspective: 1000px;
+}
+
+#diary-overlay.hidden .book-style {
+    transform: scale(0.8) translateY(50px) rotateX(10deg);
+}
+
+.book-cover {
+    display: flex;
+    background: #251208 url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.4"/></svg>');
+    border-radius: 8px 12px 12px 8px;
+    padding: 15px 25px 15px 10px; /* Tapa sobresale más a la derecha */
+    box-shadow: 
+        inset 0 0 20px rgba(0,0,0,0.9), 
+        0 30px 60px rgba(0,0,0,0.8), 
+        0 0 10px rgba(0,0,0,0.6);
+    border: 1px solid #140803;
+    position: relative; /* Para el z-index de las fotos */
+}
+
+.book-page {
+    background-color: #dfba86;
+    background-image: 
+        radial-gradient(circle at 30% 40%, transparent 20%, rgba(139, 90, 43, 0.25) 100%),
+        url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.2"/></svg>');
+    position: relative;
+}
+
+.left-page {
+    flex: 0 0 45px;
+    border-radius: 5px 0 0 5px / 12px 0 0 12px;
+    /* Sombras apiladas para dar grosor a la página izquierda */
+    box-shadow: 
+        inset -12px 0 20px rgba(0,0,0,0.5), /* Sombra del pliegue */
+        -2px 2px 0 #cda46f,
+        -4px 4px 0 #b78e58,
+        -6px 6px 0 #a37947,
+        -8px 8px 0 #8c6336,
+        -10px 10px 15px rgba(0,0,0,0.6); /* Sombra que proyecta sobre la tapa */
+    border-left: 1px solid rgba(255,255,255,0.15);
+    z-index: 2;
+}
+
+.book-spine {
+    flex: 0 0 20px;
+    background: linear-gradient(to right, 
+        rgba(0,0,0,0.8) 0%, 
+        rgba(0,0,0,0.95) 50%, 
+        rgba(0,0,0,0.8) 100%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,1);
+    z-index: 1; /* Debajo de las páginas */
+    margin: 0 -8px; /* Acerca las páginas sobre el lomo */
+}
+
+.right-page {
+    flex: 1;
+    border-radius: 0 6px 6px 0 / 0 15px 15px 0;
+    padding: 35px 25px 35px 30px;
+    /* Sombras apiladas para el grosor de las páginas de la derecha */
+    box-shadow: 
+        inset 15px 0 25px rgba(0,0,0,0.4), /* Sombra del pliegue */
+        2px 2px 0 #cda46f,
+        4px 4px 0 #b78e58,
+        6px 6px 0 #a37947,
+        8px 8px 0 #8c6336,
+        10px 10px 15px rgba(0,0,0,0.6); /* Sombra que proyecta sobre la tapa */
+    border-right: 1px solid rgba(255,255,255,0.15);
+    z-index: 2;
+}
+
+/* === Fotos Ocultas que Asoman === */
+#hidden-photos-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1; /* Entre la tapa y las hojas */
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+#hidden-photos-container.visible {
+    opacity: 1;
+}
+
+.diary-photo {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    background: #fdfdfd;
+    padding: 8px 8px 25px 8px; /* Estilo foto Polaroid */
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.6), 0 0 1px rgba(0,0,0,0.5); /* Sombra más ajustada */
+    border: 1px solid #d4c8b6;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: center;
+}
+
+.photo-1 { top: -35px; right: 20px; transform: rotate(12deg) scale(0); }
+.photo-2 { bottom: -40px; right: 40px; transform: rotate(-8deg) scale(0); }
+.photo-3 { top: 40%; right: -40px; transform: rotate(18deg) scale(0); }
+.photo-4 { bottom: 10%; left: 5px; transform: rotate(-15deg) scale(0); z-index: 0; }
+
+#hidden-photos-container.visible .photo-1 { transform: rotate(12deg) scale(1); }
+#hidden-photos-container.visible .photo-2 { transform: rotate(-8deg) scale(1); }
+#hidden-photos-container.visible .photo-3 { transform: rotate(18deg) scale(1); }
+#hidden-photos-container.visible .photo-4 { transform: rotate(-15deg) scale(1); }
+
+#diary-title {
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    text-align: center;
+    border-bottom: 2px solid rgba(59, 40, 24, 0.15);
+    padding-bottom: 15px;
+    color: #1f1107;
+}
+
+#diary-text-container {
+    max-height: 48vh;
+    overflow-y: auto;
+    margin-bottom: 25px;
+    padding-right: 15px;
+}
+
+#diary-text-container::-webkit-scrollbar { width: 6px; }
+#diary-text-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 4px; }
+#diary-text-container::-webkit-scrollbar-thumb { background: rgba(59, 40, 24, 0.3); border-radius: 4px; }
+
+#diary-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    line-height: 1.4;
+    margin: 0;
+    text-align: left;
+    color: #1a0d05; /* Tinta más oscura */
+    text-shadow: 0 0 1px rgba(0,0,0,0.05); /* Pequeño antialiasing de tinta */
+}
+
+#next-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--paper-color);
+    background-color: var(--leather-dark);
+    border: 1px solid var(--ink-color);
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#next-btn:active {
+    transform: translateY(2px);
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+}
+
+#next-btn:hover {
+    background-color: var(--ink-light);
+}
+
+#final-next-btn {
+    display: inline-block;
+    padding: 12px 40px;
+    margin-top: 35px;
+    background-color: transparent;
+    color: #eacb92;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 1.6rem;
+    border: 2px solid #eacb92;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    transition: background-color 0.4s, color 0.4s, transform 0.2s;
+}
+
+#final-next-btn:hover {
+    background-color: rgba(234, 203, 146, 0.2);
+    transform: scale(1.05);
+}
+
+/* Ajustes para Móviles */
+@media (max-width: 600px) {
+    .island-name {
+        font-size: 1.1rem;
+    }
+    .island-icon {
+        width: 35px;
+        height: 35px;
+    }
+    #diary-title {
+        font-size: 1.5rem;
+    }
+    #diary-text {
+        font-size: 1.4rem;
+    }
+    #pirate-ship svg {
+        width: 35px;
+        height: 35px;
+    }
+    .diary-photo { width: 110px; height: 110px; padding: 5px 5px 18px 5px; }
+    .photo-1 { top: -20px; right: 5px; }
+    .photo-2 { bottom: -20px; right: 15px; }
+    .photo-3 { top: 40%; right: -20px; }
+    .photo-4 { bottom: 10%; left: -5px; }
+    
+    #final-message-container {
+        font-size: 1.6rem;
+        padding: 20px;
+    }
+}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>La Aventura del Pirata</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Caveat para el texto a mano, IM Fell English para el mapa -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Contenedor Final Oculto (Fotos y Mensaje) -->
+    <div id="treasure-photos">
+        <div class="photo-overlay"></div>
+        <!-- Contenedor de partículas brillantes / luciérnagas -->
+        <div id="fireflies-container"></div>
+        <div id="final-message-container">
+            <div id="final-msg-1">
+                <p>Aunque la aventura fue larga, dolorosa y algunas veces sentía que me perdería en las oscuras profundidades del océano, o moriría solo y olvidado en una isla inhóspita, nunca me arrepentiré de haber seguido navegando hasta que te encontré.<br><br>
+                Porque no importa si tengo que <span class="highlight">ir al centro de la tierra y buscar un portal para encontrarte</span> 
+                <svg class="doodle" viewBox="0 0 100 100" width="32" height="32" stroke="currentColor" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin: 0 4px;"><path d="M10 10 L90 10 L50 50 L90 90 L10 90 L50 50 Z" /><path d="M30 30 Q 50 40 70 30" stroke-dasharray="2,4"/><circle cx="50" cy="50" r="10"/></svg>, 
+                o <span class="highlight">ir a otro mundo y abandonar mi cuerpo para estar contigo</span> 
+                <svg class="doodle" viewBox="0 0 100 100" width="32" height="32" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin: 0 4px;"><circle cx="50" cy="40" r="6" fill="currentColor"/><path d="M50 34 C 20 10, 10 40, 50 55 C 90 40, 80 10, 50 34" /><path d="M40 50 C 30 70, 45 80, 35 95" /><path d="M50 55 C 50 75, 60 85, 50 100" /><path d="M60 50 C 70 70, 55 80, 65 95" /></svg>, 
+                ni siquiera <span class="highlight">atravesar la galaxia para salvarte</span> 
+                <svg class="doodle" viewBox="0 0 100 100" width="32" height="32" stroke="currentColor" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin: 0 4px;"><path d="M50 10 C 60 40, 90 50, 60 60 C 70 90, 50 70, 50 70 C 50 70, 30 90, 40 60 C 10 50, 40 40, 50 10 Z" /><line x1="42" y1="45" x2="42" y2="52" stroke-width="5"/><line x1="58" y1="45" x2="58" y2="52" stroke-width="5"/></svg>...<br><br>
+                Nada de eso es demasiado porque tú eres mi tesoro.</p>
+                
+                <button id="final-next-btn">Siguiente</button>
+            </div>
+            
+            <div id="final-msg-2" style="display: none; opacity: 0; transition: opacity 2s ease-in-out;">
+                <p>No sé qué aventuras quedan por vivir, o cuántos lugares más veré de este enorme mundo...</p>
+                <p style="font-size: 2.8rem; margin-top: 40px; color: #eacb92;">Solo sé que aprendí que ya no quiero navegar solo.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="map-container">
+        <!-- Capa de Niebla de Guerra -->
+        <svg id="fog-svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5;">
+            <defs>
+                <filter id="blur-fog" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="45" />
+                </filter>
+                <mask id="fog-mask">
+                    <rect width="100%" height="100%" fill="white" />
+                    <!-- Agujeros de niebla inyectados dinámicamente -->
+                    <g id="fog-holes" filter="url(#blur-fog)"></g>
+                </mask>
+            </defs>
+            <rect width="100%" height="100%" fill="rgba(15, 8, 4, 0.88)" mask="url(#fog-mask)" />
+        </svg>
+
+        <!-- Lienzo SVG donde se dibuja la ruta animada -->
+        <svg id="path-svg" style="position: relative; z-index: 10;">
+            <!-- Filtro para dar aspecto de tinta real e imperfecta -->
+            <filter id="ink-bleed" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </svg>
+
+        <!-- Contenedor dinámico de las islas -->
+        <div id="islands-container"></div>
+        
+        <!-- El Barco Pirata - Galeón Pirata -->
+        <div id="pirate-ship">
+            <svg width="58" height="58" viewBox="0 0 120 120" fill="rgba(20,12,6,0.92)" stroke="rgba(80,50,25,0.6)" stroke-width="1" style="filter: url(#ink-bleed);">
+                <!-- Casco del barco (forma de barca con popa alta) -->
+                <path d="M8 80 Q 15 95 60 100 Q 105 95 112 80 L 105 68 Q 60 72 15 68 Z"/>
+                <!-- Superestructura de popa (castillo trasero, más alto) -->
+                <path d="M88 68 L 88 52 L 112 52 L 112 68 Z"/>
+                <!-- Cubierta principal -->
+                <path d="M15 68 L 105 68 L 105 62 L 15 62 Z"/>
+                <!-- Mástil principal (centro) -->
+                <rect x="57" y="15" width="5" height="55"/>
+                <!-- Mástil de proa (inclinado hacia adelante) -->
+                <line x1="30" y1="62" x2="16" y2="28" stroke="rgba(20,12,6,0.92)" stroke-width="4"/>
+                <!-- Verga principal (horizontal en el mástil central) -->
+                <rect x="28" y="22" width="63" height="4"/>
+                <!-- Vela mayor (cuadrada, inflada) -->
+                <path d="M30 26 Q 59 38 89 26 L 87 55 Q 59 48 33 55 Z" stroke-width="0.5"/>
+                <!-- Verga de mesana (más pequeña, en popa) -->
+                <rect x="88" y="38" width="24" height="3"/>
+                <!-- Vela de mesana -->
+                <path d="M90 41 Q 100 47 110 41 L 109 55 Q 100 50 91 55 Z" stroke-width="0.5"/>
+                <!-- Bauprés (palo diagonal en proa) -->
+                <line x1="16" y1="28" x2="4" y2="12" stroke="rgba(20,12,6,0.92)" stroke-width="3.5"/>
+                <!-- Vela de proa (triangular) -->
+                <path d="M16 28 L 4 12 L 16 50 Z" stroke-width="0.5"/>
+                <!-- Bandera pirata en el tope del mástil -->
+                <rect x="59" y="8" width="14" height="10"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Modal del Diario -->
+    <div id="diary-overlay" class="hidden">
+        <div id="diary-modal" class="book-style">
+            <div class="book-cover">
+                <!-- Contenedor para las fotos que asoman -->
+                <div id="hidden-photos-container"></div>
+                
+                <div class="book-page left-page"></div>
+                <div class="book-spine"></div>
+                <div class="book-page right-page">
+                    <h2 id="diary-title">Entrada del Diario</h2>
+                    <div id="diary-text-container">
+                        <p id="diary-text">Texto de la historia...</p>
+                    </div>
+                    <button id="next-btn">Cerrar y Navegar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
